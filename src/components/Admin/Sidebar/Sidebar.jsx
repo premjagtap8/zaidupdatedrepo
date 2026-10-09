@@ -347,7 +347,7 @@
 //       ],
 //     },
 
-    
+
 //     {
 //       title: "RETURN AND REFUND",
 
@@ -2086,48 +2086,48 @@ function Sidebar({
       ],
     },
 
-   {
-  title: "PROCUREMENT",
-
-  links: [
     {
-      name: "Add Vendor",
-      icon: <MdStore />,
-      path: "/add-vendor",
-    },
+      title: "PROCUREMENT",
 
-    {
-      name: "Vendors",
-      icon: <MdStore />,
-      path: "/vendors",
-    },
+      links: [
+        {
+          name: "Add Vendor",
+          icon: <MdStore />,
+          path: "/add-vendor",
+        },
 
-    {
-      name: "Create Purchase Order",
-      icon: <MdShoppingCart />,
-      path: "/add-purchase-order",
-    },
+        {
+          name: "Vendors",
+          icon: <MdStore />,
+          path: "/vendors",
+        },
 
-    {
-      name: "Purchase Orders",
-      icon: <MdReceipt />,
-      path: "/purchase-orders",
-    },
+        {
+          name: "Create Purchase Order",
+          icon: <MdShoppingCart />,
+          path: "/add-purchase-order",
+        },
 
-    {
-      name: "Add Purchase Bill",
-      icon: <MdPayments />,
-      path: "/add-purchase-bill",
-    },
+        {
+          name: "Purchase Orders",
+          icon: <MdReceipt />,
+          path: "/purchase-orders",
+        },
 
-    {
-      name: "Purchase Bills",
-      icon: <MdReceipt />,
-      path: "/purchase-bills",
+        {
+          name: "Add Purchase Bill",
+          icon: <MdPayments />,
+          path: "/add-purchase-bill",
+        },
+
+        {
+          name: "Purchase Bills",
+          icon: <MdReceipt />,
+          path: "/purchase-bills",
+        },
+
+      ],
     },
-    
-  ],
-},
 
     {
       title: "EMPLOYEE",
@@ -2223,8 +2223,8 @@ function Sidebar({
 
         {
           name: "Inventory",
-         icon: <MdInventory />,
-         path: "/inventory-dashboard",
+          icon: <MdInventory />,
+          path: "/inventory-dashboard",
         },
 
         {
@@ -2401,11 +2401,11 @@ function Sidebar({
             (previous) =>
               previous.map((item) =>
                 item._id ===
-                notification._id
+                  notification._id
                   ? {
-                      ...item,
-                      isRead: true,
-                    }
+                    ...item,
+                    isRead: true,
+                  }
                   : item
               )
           );
@@ -2439,7 +2439,7 @@ function Sidebar({
 
       if (
         notification?.relatedModel ===
-          "Order" &&
+        "Order" &&
         notification?.relatedId
       ) {
 
@@ -2456,9 +2456,9 @@ function Sidebar({
       if (
         (
           notification?.type ===
-            "STOCK_LOW" ||
+          "STOCK_LOW" ||
           notification?.type ===
-            "STOCK_OUT"
+          "STOCK_OUT"
         ) &&
         notification?.relatedId
       ) {
@@ -2475,7 +2475,7 @@ function Sidebar({
 
       if (
         notification?.type ===
-          "PRODUCT_RESTOCKED" &&
+        "PRODUCT_RESTOCKED" &&
         notification?.relatedId
       ) {
 
@@ -2669,11 +2669,10 @@ function Sidebar({
 
       <button
         type="button"
-        className={`sidebar-desktop-toggle ${
-          sidebarOpen
+        className={`sidebar-desktop-toggle ${sidebarOpen
             ? "sidebar-desktop-toggle-open"
             : "sidebar-desktop-toggle-closed"
-        }`}
+          }`}
         onClick={handleDesktopToggle}
         aria-label={
           sidebarOpen
@@ -2741,15 +2740,13 @@ function Sidebar({
       ================================================= */}
 
       <aside
-        className={`sidebar ${
-          isDrawerOpen
+        className={`sidebar ${isDrawerOpen
             ? "sidebar-open"
             : ""
-        } ${
-          sidebarOpen
+          } ${sidebarOpen
             ? "desktop-sidebar-open"
             : "desktop-sidebar-closed"
-        }`}
+          }`}
       >
 
         {/* =================================================
@@ -2855,15 +2852,16 @@ function Sidebar({
                     (item) => {
 
                       const isActive =
-                        location.pathname ===
-                        item.path ||
-                        (
-                          item.path !==
-                            "/admin-dashboard" &&
-                          location.pathname.startsWith(
-                            `${item.path}/`
-                          )
-                        );
+                        item.path === "/admin/leaves"
+                          ? location.pathname === "/admin/leaves"
+                          : item.path === "/admin/leaves/policies"
+                            ? location.pathname === "/admin/leaves/policies"
+                            : location.pathname === item.path ||
+                            (
+                              item.path !== "/admin-dashboard" &&
+                              location.pathname.startsWith(`${item.path}/`)
+                            );
+
 
 
                       return (
@@ -2876,11 +2874,10 @@ function Sidebar({
                         >
 
                           <button
-                            className={`menu-item ${
-                              isActive
+                            className={`menu-item ${isActive
                                 ? "active"
                                 : ""
-                            }`}
+                              }`}
                             onClick={() => {
 
                               if (
@@ -2927,13 +2924,13 @@ function Sidebar({
 
                             {item.notification &&
                               unreadCount >
-                                0 && (
+                              0 && (
 
                                 <span className="notification-count-badge">
 
                                   {
                                     unreadCount >
-                                    99
+                                      99
                                       ? "99+"
                                       : unreadCount
                                   }
@@ -2948,7 +2945,7 @@ function Sidebar({
                               <MdChevronRight
                                 className={
                                   item.notification &&
-                                  notificationOpen
+                                    notificationOpen
                                     ? "notification-arrow-open"
                                     : ""
                                 }
@@ -2966,126 +2963,83 @@ function Sidebar({
                           {item.notification &&
                             notificationOpen && (
 
-                            <div className="sidebar-notification-panel">
+                              <div className="sidebar-notification-panel">
 
-                              <div className="notification-panel-header">
+                                <div className="notification-panel-header">
 
-                                <div>
+                                  <div>
 
-                                  <h4>
-                                    Notifications
-                                  </h4>
+                                    <h4>
+                                      Notifications
+                                    </h4>
 
-                                  <span>
-                                    {
-                                      unreadCount
-                                    }{" "}
-                                    unread
-                                  </span>
+                                    <span>
+                                      {
+                                        unreadCount
+                                      }{" "}
+                                      unread
+                                    </span>
+
+                                  </div>
+
+
+                                  <button
+                                    type="button"
+                                    className="notification-refresh-btn"
+                                    onClick={
+                                      loadNotifications
+                                    }
+                                    title="Refresh notifications"
+                                  >
+
+                                    <MdRefresh
+                                      className={
+                                        notificationLoading
+                                          ? "notification-refresh-spin"
+                                          : ""
+                                      }
+                                    />
+
+                                  </button>
 
                                 </div>
 
 
-                                <button
-                                  type="button"
-                                  className="notification-refresh-btn"
-                                  onClick={
-                                    loadNotifications
-                                  }
-                                  title="Refresh notifications"
-                                >
+                                <div className="notification-search-box">
 
-                                  <MdRefresh
-                                    className={
-                                      notificationLoading
-                                        ? "notification-refresh-spin"
-                                        : ""
+                                  <MdSearch />
+
+                                  <input
+                                    type="text"
+                                    placeholder="Search notifications..."
+                                    value={
+                                      notificationSearch
+                                    }
+                                    onChange={(
+                                      event
+                                    ) =>
+                                      setNotificationSearch(
+                                        event
+                                          .target
+                                          .value
+                                      )
                                     }
                                   />
 
-                                </button>
 
-                              </div>
-
-
-                              <div className="notification-search-box">
-
-                                <MdSearch />
-
-                                <input
-                                  type="text"
-                                  placeholder="Search notifications..."
-                                  value={
-                                    notificationSearch
-                                  }
-                                  onChange={(
-                                    event
-                                  ) =>
-                                    setNotificationSearch(
-                                      event
-                                        .target
-                                        .value
-                                    )
-                                  }
-                                />
-
-
-                                {notificationSearch && (
-
-                                  <button
-                                    type="button"
-                                    className="notification-search-clear"
-                                    onClick={() =>
-                                      setNotificationSearch(
-                                        ""
-                                      )
-                                    }
-                                  >
-
-                                    <MdClose />
-
-                                  </button>
-
-                                )}
-
-                              </div>
-
-
-                              {notifications.length >
-                                0 && (
-
-                                <div className="notification-panel-actions">
-
-                                  <span>
-
-                                    {
-                                      filteredNotifications.length
-                                    }{" "}
-                                    notification
-                                    {
-                                      filteredNotifications.length !==
-                                      1
-                                        ? "s"
-                                        : ""
-                                    }
-
-                                  </span>
-
-
-                                  {unreadCount >
-                                    0 && (
+                                  {notificationSearch && (
 
                                     <button
                                       type="button"
-                                      onClick={
-                                        handleMarkAllRead
+                                      className="notification-search-clear"
+                                      onClick={() =>
+                                        setNotificationSearch(
+                                          ""
+                                        )
                                       }
                                     >
 
-                                      <MdDoneAll />
-
-                                      Mark all
-                                      read
+                                      <MdClose />
 
                                     </button>
 
@@ -3093,203 +3047,245 @@ function Sidebar({
 
                                 </div>
 
-                              )}
 
-
-                              {notificationLoading &&
-                                notifications.length ===
+                                {notifications.length >
                                   0 && (
 
-                                <div className="notification-empty-state">
+                                    <div className="notification-panel-actions">
 
-                                  <div className="notification-loader" />
+                                      <span>
 
-                                  <p>
-                                    Loading
-                                    notifications...
-                                  </p>
-
-                                </div>
-
-                              )}
-
-
-                              {!notificationLoading &&
-                                filteredNotifications.length ===
-                                  0 && (
-
-                                <div className="notification-empty-state">
-
-                                  <MdNotifications />
-
-                                  <p>
-
-                                    {
-                                      notificationSearch
-                                        ? "No notifications found"
-                                        : "No notifications"
-                                    }
-
-                                  </p>
-
-
-                                  {notificationSearch && (
-
-                                    <span>
-                                      Try another
-                                      search
-                                    </span>
-
-                                  )}
-
-                                </div>
-
-                              )}
-
-
-                              {filteredNotifications.length >
-                                0 && (
-
-                                <div className="notification-list">
-
-                                  {filteredNotifications.map(
-                                    (
-                                      notification
-                                    ) => (
-
-                                      <button
-                                        type="button"
-                                        key={
-                                          notification._id
+                                        {
+                                          filteredNotifications.length
+                                        }{" "}
+                                        notification
+                                        {
+                                          filteredNotifications.length !==
+                                            1
+                                            ? "s"
+                                            : ""
                                         }
-                                        className={`notification-item ${
-                                          notification.isRead
-                                            ? "notification-read"
-                                            : "notification-unread"
-                                        }`}
-                                        onClick={() =>
-                                          handleNotificationClick(
-                                            notification
-                                          )
-                                        }
-                                      >
 
-                                        <div className="notification-item-icon">
-
-                                          <MdNotifications />
-
-                                          {!notification.isRead && (
-
-                                            <span className="notification-unread-dot" />
-
-                                          )}
-
-                                        </div>
+                                      </span>
 
 
-                                        <div className="notification-item-content">
+                                      {unreadCount >
+                                        0 && (
 
-                                          <div className="notification-item-top">
-
-                                            <strong>
-
-                                              {
-                                                notification.title ||
-                                                getNotificationType(
-                                                  notification
-                                                )
-                                              }
-
-                                            </strong>
-
-
-                                            {!notification.isRead && (
-
-                                              <MdCircle className="notification-small-dot" />
-
-                                            )}
-
-                                          </div>
-
-
-                                          <p>
-
-                                            {
-                                              notification.message ||
-                                              "You have a new notification."
+                                          <button
+                                            type="button"
+                                            onClick={
+                                              handleMarkAllRead
                                             }
+                                          >
 
-                                          </p>
+                                            <MdDoneAll />
 
+                                            Mark all
+                                            read
 
-                                          <div className="notification-item-bottom">
+                                          </button>
 
-                                            <span>
+                                        )}
 
-                                              {
-                                                getNotificationType(
-                                                  notification
-                                                )
-                                              }
+                                    </div>
 
-                                            </span>
-
-
-                                            <time>
-
-                                              {
-                                                formatNotificationDate(
-                                                  notification.createdAt ||
-                                                  notification.updatedAt
-                                                )
-                                              }
-
-                                            </time>
-
-                                          </div>
-
-                                        </div>
-
-                                      </button>
-
-                                    )
                                   )}
 
-                                </div>
 
-                              )}
+                                {notificationLoading &&
+                                  notifications.length ===
+                                  0 && (
+
+                                    <div className="notification-empty-state">
+
+                                      <div className="notification-loader" />
+
+                                      <p>
+                                        Loading
+                                        notifications...
+                                      </p>
+
+                                    </div>
+
+                                  )}
 
 
-                              <button
-                                type="button"
-                                className="notification-view-all"
-                                onClick={() => {
+                                {!notificationLoading &&
+                                  filteredNotifications.length ===
+                                  0 && (
 
-                                  setNotificationOpen(
-                                    false
-                                  );
+                                    <div className="notification-empty-state">
 
-                                  setIsDrawerOpen(
-                                    false
-                                  );
+                                      <MdNotifications />
 
-                                  navigate(
-                                    "/notifications"
-                                  );
+                                      <p>
 
-                                }}
-                              >
+                                        {
+                                          notificationSearch
+                                            ? "No notifications found"
+                                            : "No notifications"
+                                        }
 
-                                View all
-                                notifications
+                                      </p>
 
-                                <MdChevronRight />
 
-                              </button>
+                                      {notificationSearch && (
 
-                            </div>
+                                        <span>
+                                          Try another
+                                          search
+                                        </span>
 
-                          )}
+                                      )}
+
+                                    </div>
+
+                                  )}
+
+
+                                {filteredNotifications.length >
+                                  0 && (
+
+                                    <div className="notification-list">
+
+                                      {filteredNotifications.map(
+                                        (
+                                          notification
+                                        ) => (
+
+                                          <button
+                                            type="button"
+                                            key={
+                                              notification._id
+                                            }
+                                            className={`notification-item ${notification.isRead
+                                                ? "notification-read"
+                                                : "notification-unread"
+                                              }`}
+                                            onClick={() =>
+                                              handleNotificationClick(
+                                                notification
+                                              )
+                                            }
+                                          >
+
+                                            <div className="notification-item-icon">
+
+                                              <MdNotifications />
+
+                                              {!notification.isRead && (
+
+                                                <span className="notification-unread-dot" />
+
+                                              )}
+
+                                            </div>
+
+
+                                            <div className="notification-item-content">
+
+                                              <div className="notification-item-top">
+
+                                                <strong>
+
+                                                  {
+                                                    notification.title ||
+                                                    getNotificationType(
+                                                      notification
+                                                    )
+                                                  }
+
+                                                </strong>
+
+
+                                                {!notification.isRead && (
+
+                                                  <MdCircle className="notification-small-dot" />
+
+                                                )}
+
+                                              </div>
+
+
+                                              <p>
+
+                                                {
+                                                  notification.message ||
+                                                  "You have a new notification."
+                                                }
+
+                                              </p>
+
+
+                                              <div className="notification-item-bottom">
+
+                                                <span>
+
+                                                  {
+                                                    getNotificationType(
+                                                      notification
+                                                    )
+                                                  }
+
+                                                </span>
+
+
+                                                <time>
+
+                                                  {
+                                                    formatNotificationDate(
+                                                      notification.createdAt ||
+                                                      notification.updatedAt
+                                                    )
+                                                  }
+
+                                                </time>
+
+                                              </div>
+
+                                            </div>
+
+                                          </button>
+
+                                        )
+                                      )}
+
+                                    </div>
+
+                                  )}
+
+
+                                <button
+                                  type="button"
+                                  className="notification-view-all"
+                                  onClick={() => {
+
+                                    setNotificationOpen(
+                                      false
+                                    );
+
+                                    setIsDrawerOpen(
+                                      false
+                                    );
+
+                                    navigate(
+                                      "/notifications"
+                                    );
+
+                                  }}
+                                >
+
+                                  View all
+                                  notifications
+
+                                  <MdChevronRight />
+
+                                </button>
+
+                              </div>
+
+                            )}
 
                         </div>
 

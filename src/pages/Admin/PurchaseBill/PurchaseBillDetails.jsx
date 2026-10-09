@@ -645,9 +645,9 @@ const PurchaseBillDetails = () => {
           HEADER
       ================================================== */}
 
-            <button onClick={() => navigate(`/purchase-bills/${purchaseId}/invoice`)}>
-                View Invoice
-            </button>
+            {/* FIX: the stray, unstyled "View Invoice" button that was
+                here has been removed. It now lives in the header
+                actions below, next to Verify Bill. */}
 
             <div className="purchase-bill-details-header">
 
@@ -675,6 +675,19 @@ const PurchaseBillDetails = () => {
                 </div>
 
                 <div className="purchase-bill-details-header-actions">
+
+                    {/* FIX: View Invoice moved here and given its own class */}
+                    <button
+                        type="button"
+                        className="purchase-bill-details-invoice-btn"
+                        onClick={() =>
+                            navigate(
+                                `/purchase-bills/${purchaseId}/invoice`
+                            )
+                        }
+                    >
+                        View Invoice
+                    </button>
 
                     {!purchase.verified && (
 

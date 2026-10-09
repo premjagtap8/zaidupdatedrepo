@@ -126,6 +126,9 @@ function InvoicePrint() {
 
   const items = bill.items || [];
 
+  // NEW: vendor bank details saved on the bill (empty for old bills)
+  const bank = bill.vendorBankDetails || {};
+
   const rows = items.map((item) => {
     const quantity = Number(item.quantity) || 0;
     const rateExcl = Number(item.purchasePrice) || 0;
@@ -268,6 +271,11 @@ function InvoicePrint() {
 
           <div className="invoice-meta-right">
             <table className="meta-table">
+              {/* FIX: fixed table layout takes column widths from colgroup */}
+              <colgroup>
+                <col style={{ width: "40%" }} />
+                <col style={{ width: "60%" }} />
+              </colgroup>
               <tbody>
                 <tr>
                   <td>Invoice No.</td>
@@ -480,7 +488,7 @@ function InvoicePrint() {
           Tax Amount (in words): {amountInWords(totalTax)}
         </p>
 
-        {/* DECLARATION / SIGNATURE */}
+        {/* DECLARATION / BANK DETAILS / SIGNATURE */}
         <div className="declaration-signature-grid">
           <div className="declaration-box">
             <p className="section-heading">Declaration</p>
@@ -490,10 +498,21 @@ function InvoicePrint() {
             </p>
           </div>
 
-          <div className="signature-box">
-            <p>for {bill.vendorName || COMPANY.name}</p>
-            <div className="signature-space"></div>
-            <p>Authorised Signatory</p>
+          {/* NEW: bank details above the signatory */}
+          <div className="bank-signature-box">
+            <div className="bank-details">
+              <p className="section-heading">Company's Bank Details</p>
+              <p>A/c Holder's Name: {bank.accountHolderName || "-"}</p>
+              <p>Bank Name: {bank.bankName || "-"}</p>
+              <p>A/c No.: {bank.accountNumber || "-"}</p>
+              <p>IFS Code: {bank.ifscCode || "-"}</p>
+            </div>
+
+            <div className="signature-box">
+              <p>for {bill.vendorName || COMPANY.name}</p>
+              <div className="signature-space"></div>
+              <p>Authorised Signatory</p>
+            </div>
           </div>
         </div>
 

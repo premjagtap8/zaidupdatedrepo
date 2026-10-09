@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import "./Addpurchasebill.css";
+import "./AddPurchaseBill.css";
 
 
 // ======================================================
@@ -89,6 +89,22 @@ const buildAddress = (vendor) =>
     .filter(Boolean)
     .join(", ");
 
+// NEW: empty bank details object
+const emptyBankDetails = {
+  accountHolderName: "",
+  bankName: "",
+  accountNumber: "",
+  ifscCode: "",
+};
+
+// NEW: copies the vendor's bank details (snapshot) into plain strings
+const pickBankDetails = (vendor) => ({
+  accountHolderName: vendor?.bankDetails?.accountHolderName || "",
+  bankName: vendor?.bankDetails?.bankName || "",
+  accountNumber: vendor?.bankDetails?.accountNumber || "",
+  ifscCode: vendor?.bankDetails?.ifscCode || "",
+});
+
 let rowCounter = 0;
 
 const newRow = () => ({
@@ -145,6 +161,9 @@ function AddPurchaseBill() {
   const [vendorGstNumber, setVendorGstNumber] = useState("");
   const [vendorAddress, setVendorAddress] = useState("");
   const [vendorState, setVendorState] = useState("");
+  // NEW: vendor bank details (snapshot saved on the bill)
+  const [vendorBankDetails, setVendorBankDetails] =
+    useState(emptyBankDetails);
   const [vendorInvoiceNumber, setVendorInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(todayString());
   const [notes, setNotes] = useState("");
@@ -200,7 +219,6 @@ function AddPurchaseBill() {
       if (warnings.length > 0) {
         setLoadWarning(`Could not load ${warnings.join(", ")}.`);
       }
-
       setLoading(false);
     };
 
@@ -223,6 +241,8 @@ function AddPurchaseBill() {
     setVendorGstNumber("");
     setVendorAddress("");
     setVendorState("");
+    // NEW
+    setVendorBankDetails(emptyBankDetails);
   };
 
   const handleModeChange = (nextMode) => {
@@ -256,6 +276,8 @@ function AddPurchaseBill() {
     setVendorGstNumber(order.vendor?.gstNumber || "");
     setVendorAddress(buildAddress(order.vendor));
     setVendorState(order.vendor?.state || "");
+    // NEW
+    setVendorBankDetails(pickBankDetails(order.vendor));
 
     // bill only what was actually received
     const billRows = order.items
@@ -315,6 +337,8 @@ function AddPurchaseBill() {
     setVendorGstNumber(found.gstNumber || "");
     setVendorAddress(buildAddress(found));
     setVendorState(found.state || "");
+    // NEW
+    setVendorBankDetails(pickBankDetails(found));
   };
 
 
@@ -464,6 +488,8 @@ function AddPurchaseBill() {
           vendorGstNumber: vendorGstNumber.trim(),
           vendorAddress: vendorAddress.trim(),
           vendorState: vendorState.trim(),
+          // NEW
+          vendorBankDetails,
           vendorInvoiceNumber: vendorInvoiceNumber.trim(),
           invoiceDate,
           notes: notes.trim(),
