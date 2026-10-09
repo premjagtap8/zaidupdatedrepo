@@ -1,35 +1,36 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import api from "../../../api/axios";
+
 import "./PurchaseOrderEdit.css";
-
-// ======================================================
-// API BASE
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
-
-const authHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 // ======================================================
 // HELPERS
 // ======================================================
 
+// Calls the API (through the shared axios instance) and returns the parsed JSON.
+// Throws the backend's own message when the call fails.
+// Base URL and the Authorization token are handled by api/axios.js
 const fetchJson = async (path, options = {}) => {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: authHeaders(),
-    ...options,
-  });
+  let result;
 
-  const result = await response.json();
+  try {
+    const response = await api.request({
+      url: path,
+      ...options,
+    });
 
-  if (!response.ok || result.success === false) {
+    result = response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Request failed"
+    );
+  }
+
+  if (result?.success === false) {
     throw new Error(result.message || "Request failed");
   }
 
@@ -168,19 +169,19 @@ function PurchaseOrderEdit() {
           partResult,
         ] = await Promise.allSettled([
           fetchJson(
-            `/api/procurement/purchase-orders/${purchaseOrderId}`
+            `/procurement/purchase-orders/${purchaseOrderId}`
           ),
 
           fetchJson(
-            "/api/procurement/vendors"
+            "/procurement/vendors"
           ),
 
           fetchJson(
-            "/api/products"
+            "/products"
           ),
 
           fetchJson(
-            "/api/repairInventory"
+            "/repairInventory"
           ),
         ]);
 
@@ -687,11 +688,11 @@ function PurchaseOrderEdit() {
       setSubmitting(true);
 
       await fetchJson(
-        `/api/procurement/purchase-orders/${purchaseOrderId}`,
+        `/procurement/purchase-orders/${purchaseOrderId}`,
         {
           method: "PUT",
 
-          body: JSON.stringify({
+          data: {
             vendor,
 
             expectedDeliveryDate,
@@ -729,7 +730,7 @@ function PurchaseOrderEdit() {
                     row.hsnCode.trim(),
                 })
               ),
-          }),
+          },
         }
       );
 
@@ -1384,4 +1385,3 @@ function PurchaseOrderEdit() {
 }
 
 export default PurchaseOrderEdit;
-

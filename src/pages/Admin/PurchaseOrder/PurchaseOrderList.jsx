@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import api from "../../../api/axios";
 import "./PurchaseOrderList.css";
-
-
-// ======================================================
-// API BASE (same pattern as VendorList.jsx)
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
 
 
 // ======================================================
@@ -100,20 +92,12 @@ function PurchaseOrderList() {
 
     try {
 
-      const token = localStorage.getItem("token");
+      // Token is attached automatically by the axios interceptor
+      const response = await api.get("/procurement/purchase-orders");
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/procurement/purchase-orders`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const result = response.data;
 
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         throw new Error(
           result.message || "Failed to load purchase orders"
         );
@@ -123,7 +107,11 @@ function PurchaseOrderList() {
 
     } catch (err) {
 
-      setError(err.message);
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to load purchase orders"
+      );
 
     } finally {
 

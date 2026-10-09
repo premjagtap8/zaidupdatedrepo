@@ -1,18 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import api from "../../../api/axios";
+
 import "./AddVendor.css";
-
-
-// ======================================================
-// API BASE
-// Adjust this if your project already has a shared
-// axios instance / api config file — use that instead.
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
 
 
 function AddVendor() {
@@ -146,42 +137,30 @@ function AddVendor() {
 
     try {
 
-      const token = localStorage.getItem("token");
+      const response = await api.post("/procurement/vendors", {
+        vendorName: formData.vendorName.trim(),
+        contactPerson: formData.contactPerson.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
+        pincode: formData.pincode.trim(),
+        gstNumber: formData.gstNumber.trim(),
+        panNumber: formData.panNumber.trim(),
+        bankDetails: {
+          accountHolderName:
+            formData.bankDetails.accountHolderName.trim(),
+          bankName: formData.bankDetails.bankName.trim(),
+          accountNumber:
+            formData.bankDetails.accountNumber.trim(),
+          ifscCode: formData.bankDetails.ifscCode.trim(),
+        },
+      });
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/procurement/vendors`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            vendorName: formData.vendorName.trim(),
-            contactPerson: formData.contactPerson.trim(),
-            phone: formData.phone.trim(),
-            email: formData.email.trim(),
-            address: formData.address.trim(),
-            city: formData.city.trim(),
-            state: formData.state.trim(),
-            pincode: formData.pincode.trim(),
-            gstNumber: formData.gstNumber.trim(),
-            panNumber: formData.panNumber.trim(),
-            bankDetails: {
-              accountHolderName:
-                formData.bankDetails.accountHolderName.trim(),
-              bankName: formData.bankDetails.bankName.trim(),
-              accountNumber:
-                formData.bankDetails.accountNumber.trim(),
-              ifscCode: formData.bankDetails.ifscCode.trim(),
-            },
-          }),
-        }
-      );
+      const result = response.data;
 
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         throw new Error(
           result.message || "Failed to create vendor"
         );
@@ -215,7 +194,11 @@ function AddVendor() {
 
     } catch (error) {
 
-      setServerError(error.message);
+      setServerError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create vendor"
+      );
 
     } finally {
 

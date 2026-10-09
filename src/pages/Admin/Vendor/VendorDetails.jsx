@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/axios";
 import "./VendorDetails.css";
-
-// ------------------------------------------------------------------
-// API SETUP
-// Same base URL and token pattern as VendorList.jsx / AddVendor.jsx.
-// ------------------------------------------------------------------
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
-const authHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 // Show "-" for empty values
 const show = (value) =>
@@ -46,9 +35,8 @@ function VendorDetails() {
                 setLoading(true);
                 setError("");
 
-                const res = await axios.get(
-                    `${API_BASE_URL}/api/procurement/vendors/${vendorId}`,
-                    { headers: authHeaders() }
+                const res = await api.get(
+                    `/procurement/vendors/${vendorId}`
                 );
 
                 // Works whether backend returns { data }, { vendor } or the vendor directly
@@ -82,9 +70,8 @@ function VendorDetails() {
             setDeleting(true);
             setDeleteError("");
 
-            const res = await axios.delete(
-                `${API_BASE_URL}/api/procurement/vendors/${vendorId}`,
-                { headers: authHeaders() }
+            const res = await api.delete(
+                `/procurement/vendors/${vendorId}`
             );
 
             if (!res.data.success) {

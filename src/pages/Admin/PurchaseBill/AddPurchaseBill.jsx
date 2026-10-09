@@ -1,21 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import api from "../../../api/axios";
 import "./AddPurchaseBill.css";
-
-
-// ======================================================
-// API BASE (same pattern as VendorList.jsx)
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
-
-const authHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 
 // ======================================================
@@ -23,20 +10,33 @@ const authHeaders = () => ({
 // ======================================================
 
 // Returns the parsed JSON, or throws the backend's own message
+// (token is attached automatically by the axios interceptor)
 const fetchJson = async (path, options = {}) => {
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: authHeaders(),
-    ...options,
-  });
+  try {
 
-  const result = await response.json();
+    const response = await api.request({
+      url: path,
+      method: options.method || "GET",
+      data: options.data,
+    });
 
-  if (!response.ok || result.success === false) {
-    throw new Error(result.message || "Request failed");
+    const result = response.data;
+
+    if (result?.success === false) {
+      throw new Error(result.message || "Request failed");
+    }
+
+    return result;
+
+  } catch (error) {
+
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Request failed"
+    );
   }
-
-  return result;
 };
 
 // Finds the list inside a response, whatever its shape
@@ -184,10 +184,10 @@ function AddPurchaseBill() {
 
       const [vendorResult, poResult, productResult, partResult] =
         await Promise.allSettled([
-          fetchJson("/api/procurement/vendors"),
-          fetchJson("/api/procurement/purchase-orders/available-for-billing"),
-          fetchJson("/api/products"),
-          fetchJson("/api/repairInventory"),
+          fetchJson("/procurement/vendors"),
+          fetchJson("/procurement/purchase-orders/available-for-billing"),
+          fetchJson("/products"),
+          fetchJson("/repairInventory"),
         ]);
 
       const warnings = [];
@@ -479,9 +479,9 @@ function AddPurchaseBill() {
 
       setSubmitting(true);
 
-      await fetchJson("/api/purchase", {
+      await fetchJson("/purchase", {
         method: "POST",
-        body: JSON.stringify({
+        data: {
           vendorName: vendorName.trim(),
           vendorPhone: vendorPhone.trim(),
           vendorEmail: vendorEmail.trim(),
@@ -503,7 +503,7 @@ function AddPurchaseBill() {
             // a blank GST lets the backend use the item's saved GST rate
             ...(row.gst !== "" && { gst: Number(row.gst) }),
           })),
-        }),
+        },
       });
 
       navigate("/purchase-bills");

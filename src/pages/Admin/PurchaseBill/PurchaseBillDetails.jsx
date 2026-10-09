@@ -1,16 +1,19 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import api from "../../../api/axios";
 import "./PurchaseBillDetails.css";
 
 // ======================================================
-// API BASE
+// FILE BASE URL
+// Uploaded files (payment slips) are served from the server
+// root, not under /api, so strip the trailing /api.
 // ======================================================
 
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL ||
-    "http://localhost:5000";
+const FILE_BASE_URL = (api.defaults.baseURL || "").replace(
+    /\/api\/?$/,
+    ""
+);
 
 // ======================================================
 // HELPERS
@@ -151,20 +154,8 @@ const PurchaseBillDetails = () => {
         useState(false);
 
     // ======================================================
-    // AUTH HEADERS
-    // ======================================================
-
-    const authHeaders = () => {
-        const token = localStorage.getItem("token");
-
-        return {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        };
-    };
-
-    // ======================================================
     // FETCH PURCHASE BILL
+    // (token is attached automatically by the axios interceptor)
     // ======================================================
 
     const fetchPurchaseBill = async () => {
@@ -172,24 +163,11 @@ const PurchaseBillDetails = () => {
             setLoading(true);
             setError("");
 
-            const response = await fetch(
-                `${API_BASE_URL}/api/purchase/${purchaseId}`,
-                {
-                    method: "GET",
-                    headers: authHeaders(),
-                }
+            const response = await api.get(
+                `/purchase/${purchaseId}`
             );
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    result?.message ||
-                    "Failed to fetch purchase bill"
-                );
-            }
-
-            setPurchase(result?.data || null);
+            setPurchase(response.data?.data || null);
         } catch (err) {
             console.error(
                 "Purchase bill details error:",
@@ -197,6 +175,7 @@ const PurchaseBillDetails = () => {
             );
 
             setError(
+                err.response?.data?.message ||
                 err.message ||
                 "Failed to load purchase bill"
             );
@@ -227,22 +206,7 @@ const PurchaseBillDetails = () => {
         try {
             setVerifying(true);
 
-            const response = await fetch(
-                `${API_BASE_URL}/api/purchase/${purchaseId}/verify`,
-                {
-                    method: "PUT",
-                    headers: authHeaders(),
-                }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    result?.message ||
-                    "Failed to verify purchase bill"
-                );
-            }
+            await api.put(`/purchase/${purchaseId}/verify`);
 
             await fetchPurchaseBill();
         } catch (err) {
@@ -252,6 +216,7 @@ const PurchaseBillDetails = () => {
             );
 
             alert(
+                err.response?.data?.message ||
                 err.message ||
                 "Failed to verify purchase bill"
             );
@@ -489,32 +454,19 @@ const PurchaseBillDetails = () => {
                 );
             }
 
-            const token =
-                localStorage.getItem("token");
-
-            const response = await fetch(
-                `${API_BASE_URL}/api/purchase/${purchaseId}/payment`,
+            // The axios instance defaults to application/json, which
+            // would turn this FormData into JSON and drop the file.
+            // Overriding it here lets the browser send a proper
+            // multipart body with its boundary.
+            await api.put(
+                `/purchase/${purchaseId}/payment`,
+                formData,
                 {
-                    method: "PUT",
-
                     headers: {
-                        Authorization:
-                            `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
                     },
-
-                    body: formData,
                 }
             );
-
-            const result =
-                await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    result?.message ||
-                    "Failed to record payment"
-                );
-            }
 
             resetPaymentForm();
 
@@ -532,6 +484,7 @@ const PurchaseBillDetails = () => {
             );
 
             alert(
+                err.response?.data?.message ||
                 err.message ||
                 "Failed to record payment"
             );
@@ -1302,7 +1255,7 @@ const PurchaseBillDetails = () => {
                                                             <strong>
 
                                                                 <a
-                                                                    href={`${API_BASE_URL}${payment.paymentSlip.fileUrl}`}
+                                                                    href={`${FILE_BASE_URL}${payment.paymentSlip.fileUrl}`}
                                                                     target="_blank"
                                                                     rel="noreferrer"
                                                                 >

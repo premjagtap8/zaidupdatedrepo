@@ -1,22 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+
+import api from "../../../api/axios";
 
 import "./EditVendor.css";
-
-
-// ======================================================
-// API BASE
-// Same pattern as AddVendor.jsx / VendorDetails.jsx
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
-
-const authHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 
 function EditVendor() {
@@ -69,9 +56,8 @@ function EditVendor() {
         setLoading(true);
         setLoadError("");
 
-        const res = await axios.get(
-          `${API_BASE_URL}/api/procurement/vendors/${vendorId}`,
-          { headers: authHeaders() }
+        const res = await api.get(
+          `/procurement/vendors/${vendorId}`
         );
 
         const vendor = res.data.data || res.data.vendor || res.data;
@@ -210,8 +196,8 @@ function EditVendor() {
 
     try {
 
-      const response = await axios.put(
-        `${API_BASE_URL}/api/procurement/vendors/${vendorId}`,
+      const response = await api.put(
+        `/procurement/vendors/${vendorId}`,
         {
           vendorName: formData.vendorName.trim(),
           contactPerson: formData.contactPerson.trim(),
@@ -230,8 +216,7 @@ function EditVendor() {
             accountNumber: formData.bankDetails.accountNumber.trim(),
             ifscCode: formData.bankDetails.ifscCode.trim(),
           },
-        },
-        { headers: authHeaders() }
+        }
       );
 
       if (!response.data.success) {

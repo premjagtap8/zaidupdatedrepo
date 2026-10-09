@@ -1,39 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import api from "../../../api/axios";
+
 import "./CreatePurchaseOrder.css";
-
-
-// ======================================================
-// API BASE (same pattern as VendorList.jsx)
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
-
-const authHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 
 // ======================================================
 // HELPERS
 // ======================================================
 
-// Calls the API and returns the parsed JSON.
+// Calls the API (through the shared axios instance) and returns the parsed JSON.
 // Throws the backend's own message when the call fails.
+// Base URL and the Authorization token are handled by api/axios.js
 const fetchJson = async (path, options = {}) => {
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: authHeaders(),
-    ...options,
-  });
+  let result;
 
-  const result = await response.json();
+  try {
 
-  if (!response.ok || result.success === false) {
+    const response = await api.request({
+      url: path,
+      ...options,
+    });
+
+    result = response.data;
+
+  } catch (error) {
+
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Request failed"
+    );
+  }
+
+  if (result?.success === false) {
     throw new Error(result.message || "Request failed");
   }
 
@@ -134,9 +136,9 @@ function CreatePurchaseOrder() {
 
       const [vendorResult, productResult, partResult] =
         await Promise.allSettled([
-          fetchJson("/api/procurement/vendors"),
-          fetchJson("/api/products"),
-          fetchJson("/api/repairInventory"),
+          fetchJson("/procurement/vendors"),
+          fetchJson("/products"),
+          fetchJson("/repairInventory"),
         ]);
 
       if (vendorResult.status === "fulfilled") {
@@ -342,9 +344,9 @@ function CreatePurchaseOrder() {
 
       setSubmitting(true);
 
-      await fetchJson("/api/procurement/purchase-orders", {
+      await fetchJson("/procurement/purchase-orders", {
         method: "POST",
-        body: JSON.stringify({
+        data: {
           vendor,
           expectedDeliveryDate,
           notes: notes.trim(),
@@ -356,7 +358,7 @@ function CreatePurchaseOrder() {
             gstRate: row.gstRate === "" ? 0 : Number(row.gstRate),
             hsnCode: row.hsnCode.trim(),
           })),
-        }),
+        },
       });
 
       navigate("/purchase-orders");

@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import api from "../../../api/axios";
 import { COMPANY } from "./companyDetails.js";
 import { amountInWords } from "./amountInWords.js";
 
 import "./InvoicePrint.css";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // ==========================================================
 // DATE FORMAT: dd-Mon-yy  (e.g. 17-Aug-26)
@@ -66,26 +64,22 @@ function InvoicePrint() {
       setError("");
 
       try {
-        const token = localStorage.getItem("token");
+        // Token is attached automatically by the axios interceptor
+        const response = await api.get(`/purchase/${purchaseId}`);
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/purchase/${purchaseId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const result = response.data;
 
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
+        if (!result.success) {
           throw new Error(result.message || "Failed to load bill");
         }
 
         setBill(result.data);
       } catch (err) {
-        setError(err.message);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to load bill"
+        );
       } finally {
         setLoading(false);
       }

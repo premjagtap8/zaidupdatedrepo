@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+import api from "../../../api/axios";
+
 import "./VendorList.css";
-
-
-// ======================================================
-// API BASE
-// Keep this in sync with AddVendor.jsx — move both to a
-// shared config/service file once you have one.
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
 
 
 function VendorList() {
@@ -41,20 +32,11 @@ function VendorList() {
 
     try {
 
-      const token = localStorage.getItem("token");
+      const response = await api.get("/procurement/vendors");
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/procurement/vendors`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const result = response.data;
 
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         throw new Error(
           result.message || "Failed to load vendors"
         );
@@ -64,7 +46,11 @@ function VendorList() {
 
     } catch (err) {
 
-      setError(err.message);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to load vendors"
+      );
 
     } finally {
 

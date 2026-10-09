@@ -1,35 +1,36 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import api from "../../../api/axios";
+
 import "./PurchaseOrderDetails.css";
-
-// ======================================================
-// API BASE
-// ======================================================
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000";
-
-const authHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 // ======================================================
 // HELPERS
 // ======================================================
 
-// Returns the parsed JSON, or throws the backend's own message
+// Calls the API (through the shared axios instance) and returns the parsed JSON.
+// Throws the backend's own message when the call fails.
+// Base URL and the Authorization token are handled by api/axios.js
 const fetchJson = async (path, options = {}) => {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: authHeaders(),
-    ...options,
-  });
+  let result;
 
-  const result = await response.json();
+  try {
+    const response = await api.request({
+      url: path,
+      ...options,
+    });
 
-  if (!response.ok || result.success === false) {
+    result = response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Request failed"
+    );
+  }
+
+  if (result?.success === false) {
     throw new Error(result.message || "Request failed");
   }
 
@@ -171,7 +172,7 @@ function PurchaseOrderDetails() {
         }
 
         const result = await fetchJson(
-          `/api/procurement/purchase-orders/${purchaseOrderId}`
+          `/procurement/purchase-orders/${purchaseOrderId}`
         );
 
         setOrder(result.data);
@@ -207,10 +208,10 @@ function PurchaseOrderDetails() {
 
     try {
       await fetchJson(
-        `/api/procurement/purchase-orders/${purchaseOrderId}/${path}`,
+        `/procurement/purchase-orders/${purchaseOrderId}/${path}`,
         {
           method: "PUT",
-          body: body ? JSON.stringify(body) : undefined,
+          data: body || undefined,
         }
       );
 
@@ -236,7 +237,7 @@ function PurchaseOrderDetails() {
 
     try {
       await fetchJson(
-        `/api/procurement/purchase-orders/${purchaseOrderId}`,
+        `/procurement/purchase-orders/${purchaseOrderId}`,
         {
           method: "DELETE",
         }
