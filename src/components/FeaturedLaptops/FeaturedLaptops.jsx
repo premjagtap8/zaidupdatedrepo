@@ -1,6 +1,11 @@
-
-import React, { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Star } from "lucide-react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ArrowRight, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import LaptopCard from "./LaptopCard";
@@ -18,6 +23,20 @@ const tabs = [
 ];
 
 // =====================================================
+// RESPONSIVE CARD SIZE (shared by cards + loading skeletons)
+//   mobile  : ~78% of the row  -> next card peeks in (swipe hint)
+//   tablet  : 44% of the row   -> 2 cards + a peek of the 3rd
+//   desktop : exactly 4 cards per row (gap-6 = 1.5rem, 3 gaps = 4.5rem)
+// =====================================================
+
+const CARD_SIZE =
+  "flex-none snap-start w-[78%] sm:w-[44%] lg:w-[calc((100%_-_4.5rem)/4)]";
+
+// Hide the scrollbar on every browser (works even without a plugin)
+const HIDE_SCROLLBAR =
+  "scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden";
+
+// =====================================================
 // COMPONENT
 // =====================================================
 
@@ -27,6 +46,11 @@ const FeaturedLaptops = () => {
   const [activeTab, setActiveTab] = useState("New Arrivals");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Carousel state
+  const scrollerRef = useRef(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
 
   // =====================================================
   // IMAGE BASE URL
@@ -45,10 +69,6 @@ const FeaturedLaptops = () => {
   useEffect(() => {
     loadProducts();
   }, []);
-
-  // =====================================================
-  // LOAD SHOP PRODUCTS
-  // =====================================================
 
   const loadProducts = async () => {
     try {
@@ -153,10 +173,7 @@ const FeaturedLaptops = () => {
   const getProductImages = (product) => {
     const result = [];
 
-    // -----------------------------------------------------
     // images array
-    // -----------------------------------------------------
-
     if (Array.isArray(product?.images)) {
       product.images.forEach((image) => {
         if (!image) return;
@@ -178,10 +195,7 @@ const FeaturedLaptops = () => {
       });
     }
 
-    // -----------------------------------------------------
     // image object
-    // -----------------------------------------------------
-
     if (product?.image && typeof product.image === "object") {
       const url =
         product.image?.url ||
@@ -194,10 +208,7 @@ const FeaturedLaptops = () => {
       }
     }
 
-    // -----------------------------------------------------
     // single image fields
-    // -----------------------------------------------------
-
     const singleImages = [
       product?.primaryImage,
       product?.thumbnail,
@@ -365,22 +376,6 @@ const FeaturedLaptops = () => {
   };
 
   // =====================================================
-  // CATEGORY
-  // =====================================================
-
-  const getCategory = (product) => {
-    return getName(product?.category).toLowerCase().trim();
-  };
-
-  // =====================================================
-  // SUBCATEGORY
-  // =====================================================
-
-  const getSubcategory = (product) => {
-    return getName(product?.subcategory).toLowerCase().trim();
-  };
-
-  // =====================================================
   // GAMING CHECK
   // =====================================================
 
@@ -418,9 +413,7 @@ const FeaturedLaptops = () => {
       "gaming laptop",
     ];
 
-    return gamingKeywords.some((keyword) =>
-      text.includes(keyword)
-    );
+    return gamingKeywords.some((keyword) => text.includes(keyword));
   };
 
   // =====================================================
@@ -438,16 +431,11 @@ const FeaturedLaptops = () => {
     const subcategory = getName(product?.subcategory);
 
     const description =
-      product?.shortDescription ||
-      product?.description ||
-      "";
+      product?.shortDescription || product?.description || "";
 
     const images = getProductImages(product);
 
-    // -----------------------------------------------------
-    // BADGE
-    // -----------------------------------------------------
-
+    // Badge
     let badge = "NEW";
     let badgeBg = "bg-emerald-600";
 
@@ -462,31 +450,19 @@ const FeaturedLaptops = () => {
     return normalizeProductImages({
       ...product,
 
-      // ID
       id: product?._id || product?.id,
 
-      // Name
-      title:
-        product?.name ||
-        product?.title ||
-        "Laptop",
+      title: product?.name || product?.title || "Laptop",
 
-      // Description
       subtitle:
         description ||
-        [brand, category, subcategory]
-          .filter(Boolean)
-          .join(" • ") ||
+        [brand, category, subcategory].filter(Boolean).join(" • ") ||
         "Premium Laptop",
 
-      // Price
       price,
-
       originalPrice: mrp,
-
       discount,
 
-      // Rating
       rating: Number(
         product?.rating ??
           product?.averageRating ??
@@ -494,23 +470,14 @@ const FeaturedLaptops = () => {
           0
       ),
 
-      // Images
-      primaryImage:
-        images[0] || getImageUrl(product, 0),
+      primaryImage: images[0] || getImageUrl(product, 0),
 
-      hoverImage:
-        images[1] ||
-        images[0] ||
-        getImageUrl(product, 0),
+      hoverImage: images[1] || images[0] || getImageUrl(product, 0),
 
-      // Product type
       productType: refurbished
         ? "REFURBISHED"
-        : String(
-            product?.productType || "NEW"
-          ).toUpperCase(),
+        : String(product?.productType || "NEW").toUpperCase(),
 
-      // Badge
       badge,
       badgeBg,
     });
@@ -525,9 +492,7 @@ const FeaturedLaptops = () => {
       return [];
     }
 
-    return products
-      .map(formatProduct)
-      .filter((product) => product?.id);
+    return products.map(formatProduct).filter((product) => product?.id);
   }, [products]);
 
   // =====================================================
@@ -535,50 +500,26 @@ const FeaturedLaptops = () => {
   // =====================================================
 
   const filteredProducts = useMemo(() => {
-    // -----------------------------------------------------
     // NEW ARRIVALS
-    // -----------------------------------------------------
-
     if (activeTab === "New Arrivals") {
       return formattedProducts
-        .filter(
-          (product) =>
-            !isRefurbished(product)
-        )
+        .filter((product) => !isRefurbished(product))
         .slice(0, 8);
     }
 
-    // -----------------------------------------------------
     // BEST SELLERS
-    // -----------------------------------------------------
-
     if (activeTab === "Best Sellers") {
       return [...formattedProducts]
-        .filter(
-          (product) =>
-            !isRefurbished(product)
-        )
+        .filter((product) => !isRefurbished(product))
         .sort((a, b) => {
-          const ratingA = Number(
-            a?.rating || 0
-          );
-
-          const ratingB = Number(
-            b?.rating || 0
-          );
+          const ratingA = Number(a?.rating || 0);
+          const ratingB = Number(b?.rating || 0);
 
           const salesA = Number(
-            a?.soldCount ??
-              a?.salesCount ??
-              a?.totalSold ??
-              0
+            a?.soldCount ?? a?.salesCount ?? a?.totalSold ?? 0
           );
-
           const salesB = Number(
-            b?.soldCount ??
-              b?.salesCount ??
-              b?.totalSold ??
-              0
+            b?.soldCount ?? b?.salesCount ?? b?.totalSold ?? 0
           );
 
           // Sales first
@@ -592,32 +533,20 @@ const FeaturedLaptops = () => {
         .slice(0, 8);
     }
 
-    // -----------------------------------------------------
     // REFURBISHED DEALS
-    // -----------------------------------------------------
-
     if (activeTab === "Refurbished Deals") {
       return formattedProducts
-        .filter((product) =>
-          isRefurbished(product)
-        )
+        .filter((product) => isRefurbished(product))
         .sort(
-          (a, b) =>
-            Number(b.discount || 0) -
-            Number(a.discount || 0)
+          (a, b) => Number(b.discount || 0) - Number(a.discount || 0)
         )
         .slice(0, 8);
     }
 
-    // -----------------------------------------------------
     // GAMING LAPTOPS
-    // -----------------------------------------------------
-
     if (activeTab === "Gaming Laptops") {
       return formattedProducts
-        .filter((product) =>
-          isGamingLaptop(product)
-        )
+        .filter((product) => isGamingLaptop(product))
         .slice(0, 8);
     }
 
@@ -625,15 +554,47 @@ const FeaturedLaptops = () => {
   }, [formattedProducts, activeTab]);
 
   // =====================================================
-  // GO TO SHOP
+  // CAROUSEL: arrow state + scrolling
   // =====================================================
 
-  const handleViewAll = () => {
-    navigate("/shop");
+  const updateScrollState = useCallback(() => {
+    const el = scrollerRef.current;
+
+    if (!el) {
+      setCanPrev(false);
+      setCanNext(false);
+      return;
+    }
+
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  // Re-check whenever the visible list changes, and on window resize
+  useEffect(() => {
+    updateScrollState();
+
+    window.addEventListener("resize", updateScrollState);
+    return () => window.removeEventListener("resize", updateScrollState);
+  }, [filteredProducts, loading, updateScrollState]);
+
+  const scrollByPage = (direction) => {
+    const el = scrollerRef.current;
+
+    if (!el) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    el.scrollBy({
+      left: direction * el.clientWidth * 0.9,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
   };
 
   // =====================================================
-  // GO TO SHOP AND ALWAYS START AT TOP
+  // NAVIGATION
   // =====================================================
 
   const handleShopNavigation = () => {
@@ -656,6 +617,9 @@ const FeaturedLaptops = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+
+    // Start the new list from the first card
+    scrollerRef.current?.scrollTo({ left: 0, behavior: "auto" });
   };
 
   // =====================================================
@@ -672,12 +636,15 @@ const FeaturedLaptops = () => {
 
   return (
     <section
+      aria-labelledby="featured-laptops-heading"
       className="
-        pt-4
-        sm:pt-6
-        pb-4
-        sm:pb-6
+        pt-6
+        sm:pt-8
+        pb-6
+        sm:pb-8
         px-4
+        sm:px-6
+        lg:px-8
         max-w-7xl
         mx-auto
         font-sans
@@ -691,16 +658,20 @@ const FeaturedLaptops = () => {
           HEADER
       ================================================= */}
 
-      <div className="text-center mb-6">
+      <div className="text-center mb-5 sm:mb-6">
         <h2
+          id="featured-laptops-heading"
           className="
-            text-xl
+            text-lg
+            sm:text-xl
             md:text-2xl
             font-black
             uppercase
-            tracking-widest
+            tracking-wider
+            sm:tracking-widest
             text-gray-900
             dark:text-white
+            text-balance
           "
         >
           FEATURED LAPTOPS
@@ -709,219 +680,327 @@ const FeaturedLaptops = () => {
 
       {/* =================================================
           TABS
+          - "mx-auto w-max" centres the tabs when they fit and
+            lets them scroll from the LEFT edge when they don't
+            (justify-center would cut off the first tab).
+          - the active underline sits ON the border line (-mb-px)
       ================================================= */}
 
       <div
-        className="
-          flex
-          items-center
-          justify-center
-          gap-6
-          md:gap-10
-          mb-8
+        className={`
+          -mx-4
+          px-4
+          sm:mx-0
+          sm:px-0
+          mb-6
+          sm:mb-8
+          overflow-x-auto
           border-b
           border-gray-100
           dark:border-slate-800
-          overflow-x-auto
-          scrollbar-hide
-          pb-2
-        "
+          ${HIDE_SCROLLBAR}
+        `}
       >
-        {tabs.map((tab) => {
-          const active = activeTab === tab;
+        <div
+          role="tablist"
+          aria-label="Featured laptop categories"
+          className="
+            flex
+            items-center
+            gap-5
+            sm:gap-8
+            md:gap-10
+            mx-auto
+            w-max
+          "
+        >
+          {tabs.map((tab) => {
+            const active = activeTab === tab;
 
-          return (
-            <button
-              key={tab}
-              type="button"
-              onClick={() =>
-                handleTabChange(tab)
-              }
-              className={`
-                text-sm
-                font-bold
-                transition-all
-                relative
-                pb-2
-                whitespace-nowrap
-                ${
-                  active
-                    ? "text-[#008a45] dark:text-emerald-400"
-                    : "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white"
-                }
-              `}
-            >
-              {tab}
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => handleTabChange(tab)}
+                className={`
+                  relative
+                  -mb-px
+                  min-h-[44px]
+                  py-3
+                  text-[13px]
+                  sm:text-sm
+                  font-bold
+                  whitespace-nowrap
+                  transition-colors
+                  duration-200
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[#008a45]
+                  focus-visible:ring-offset-2
+                  dark:focus-visible:ring-emerald-400
+                  dark:focus-visible:ring-offset-slate-950
+                  rounded-sm
+                  ${
+                    active
+                      ? "text-[#008a45] dark:text-emerald-400"
+                      : "text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white"
+                  }
+                `}
+              >
+                {tab}
 
-              {active && (
-                <span
-                  className="
-                    absolute
-                    bottom-0
-                    left-0
-                    w-full
-                    h-[3px]
-                    bg-[#008a45]
-                    dark:bg-emerald-400
-                    rounded-full
-                  "
-                />
-              )}
-            </button>
-          );
-        })}
+                {active && (
+                  <span
+                    aria-hidden="true"
+                    className="
+                      absolute
+                      bottom-0
+                      left-0
+                      w-full
+                      h-[3px]
+                      bg-[#008a45]
+                      dark:bg-emerald-400
+                      rounded-full
+                    "
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* =================================================
-          LOADING
+          LOADING (same sizes as the real cards)
       ================================================= */}
 
       {loading && (
         <div
-          className="
-            grid
-            grid-cols-1
-            sm:grid-cols-2
-            lg:grid-cols-4
-            gap-6
-          "
+          aria-busy="true"
+          className={`
+            -mx-4
+            px-4
+            sm:-mx-6
+            sm:px-6
+            lg:mx-0
+            lg:px-0
+            flex
+            gap-4
+            sm:gap-5
+            lg:gap-6
+            overflow-hidden
+          `}
         >
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="
-                h-[380px]
+              className={`
+                ${CARD_SIZE}
+                h-[340px]
+                sm:h-[380px]
                 rounded-xl
                 bg-gray-100
                 dark:bg-slate-900
-                animate-pulse
-              "
+                motion-safe:animate-pulse
+              `}
             />
           ))}
         </div>
       )}
 
       {/* =================================================
-          PRODUCTS
+          PRODUCTS — swipeable row with snap + desktop arrows
       ================================================= */}
 
-      {/* {!loading &&
-        filteredProducts.length > 0 && (
-          <div
+      {!loading && filteredProducts.length > 0 && (
+        <div className="relative">
+          {/* Prev arrow (tablet/desktop only — phones swipe) */}
+          <button
+            type="button"
+            onClick={() => scrollByPage(-1)}
+            disabled={!canPrev}
+            aria-label="Previous laptops"
             className="
-              grid
-              grid-cols-1
-              sm:grid-cols-2
-              lg:grid-cols-4
-              gap-6
+              hidden
+              md:flex
+              absolute
+              top-1/2
+              -left-3
+              lg:-left-5
+              z-10
+              h-10
+              w-10
+              -translate-y-1/2
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-gray-200
+              bg-white
+              text-gray-800
+              shadow-md
+              transition
+              duration-200
+              hover:bg-gray-50
+              disabled:pointer-events-none
+              disabled:opacity-0
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[#008a45]
+              dark:border-slate-700
+              dark:bg-slate-800
+              dark:text-white
+              dark:hover:bg-slate-700
             "
           >
-            {filteredProducts.map(
-              (product) => (
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          {/* Next arrow */}
+          <button
+            type="button"
+            onClick={() => scrollByPage(1)}
+            disabled={!canNext}
+            aria-label="Next laptops"
+            className="
+              hidden
+              md:flex
+              absolute
+              top-1/2
+              -right-3
+              lg:-right-5
+              z-10
+              h-10
+              w-10
+              -translate-y-1/2
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-gray-200
+              bg-white
+              text-gray-800
+              shadow-md
+              transition
+              duration-200
+              hover:bg-gray-50
+              disabled:pointer-events-none
+              disabled:opacity-0
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[#008a45]
+              dark:border-slate-700
+              dark:bg-slate-800
+              dark:text-white
+              dark:hover:bg-slate-700
+            "
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          <div
+            ref={scrollerRef}
+            onScroll={updateScrollState}
+            className={`
+              -mx-4
+              px-4
+              sm:-mx-6
+              sm:px-6
+              lg:mx-0
+              lg:px-0
+              scroll-pl-4
+              sm:scroll-pl-6
+              lg:scroll-pl-0
+              flex
+              flex-nowrap
+              gap-4
+              sm:gap-5
+              lg:gap-6
+              overflow-x-auto
+              overflow-y-hidden
+              snap-x
+              snap-mandatory
+              overscroll-x-contain
+              pb-2
+              ${HIDE_SCROLLBAR}
+            `}
+          >
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className={`${CARD_SIZE} flex [&>*]:h-full [&>*]:w-full`}
+              >
                 <LaptopCard
-                  key={product.id}
                   product={product}
-                  onImageError={
-                    handleImageError
-                  }
+                  onImageError={handleImageError}
                 />
-              )
-            )}
+              </div>
+            ))}
           </div>
-        )} */}
-
-
-        {!loading &&
-  filteredProducts.length > 0 && (
-    <div
-      className="
-        flex
-        flex-nowrap
-        gap-6
-        overflow-x-auto
-        overflow-y-hidden
-        scrollbar-hide
-        pb-2
-      "
-    >
-      {filteredProducts.map((product) => (
-        <div
-          key={product.id}
-          className="
-            flex-none
-            w-[280px]
-            sm:w-[300px]
-            lg:w-[310px]
-          "
-        >
-          <LaptopCard
-            product={product}
-            onImageError={handleImageError}
-          />
         </div>
-      ))}
-    </div>
-  )}
+      )}
 
       {/* =================================================
           EMPTY STATE
       ================================================= */}
 
-      {!loading &&
-        filteredProducts.length === 0 && (
-          <div className="py-12 text-center">
-            <div className="flex justify-center mb-3">
-              <Star className="w-8 h-8 text-gray-300" />
-            </div>
-
-            <h3
-              className="
-                text-lg
-                font-bold
-                text-gray-700
-                dark:text-gray-300
-              "
-            >
-              No Products Found
-            </h3>
-
-            <p
-              className="
-                text-sm
-                text-gray-500
-                dark:text-gray-400
-                mt-1
-              "
-            >
-              No products are available
-              in this section yet.
-            </p>
+      {!loading && filteredProducts.length === 0 && (
+        <div className="py-10 sm:py-12 text-center">
+          <div className="flex justify-center mb-3">
+            <Star className="w-8 h-8 text-gray-300" />
           </div>
-        )}
+
+          <h3 className="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300">
+            No Products Found
+          </h3>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            No products are available in this section yet.
+          </p>
+        </div>
+      )}
 
       {/* =================================================
           VIEW ALL
       ================================================= */}
 
-      <div className="text-center mt-8">
+      <div className="text-center mt-6 sm:mt-8">
         <button
           type="button"
           onClick={handleShopNavigation}
           className="
+            group
             inline-flex
             items-center
             gap-2
+            min-h-[44px]
+            px-3
             text-sm
             font-bold
             text-[#008a45]
             dark:text-emerald-400
             hover:underline
             cursor-pointer
+            rounded-md
+            focus-visible:outline-none
+            focus-visible:ring-2
+            focus-visible:ring-[#008a45]
+            dark:focus-visible:ring-emerald-400
           "
         >
           <span>View All Laptops</span>
 
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight
+            className="
+              w-4
+              h-4
+              motion-safe:transition-transform
+              motion-safe:duration-200
+              group-hover:translate-x-1
+            "
+          />
         </button>
       </div>
     </section>

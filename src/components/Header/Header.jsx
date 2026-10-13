@@ -122,7 +122,7 @@
 // // export default function Header() {
 // //    const phoneNumber = '919876543210';
 // //   const message = encodeURIComponent('Hi Zaid Infotech, I have a query!');
-  
+
 // //   const [category, setCategory] = useState(categories[0]);
 // //   const [query, setQuery] = useState("");
 // //   const [wishlistCount, setWishlistCount] = useState(0);
@@ -1046,8 +1046,8 @@
 // //                     navigate(`https://wa.me/${phoneNumber}?text=${message}`)
 
 // //                 }
-                 
-                  
+
+
 // //                 }
 // //               >
 // //                 <span>
@@ -1571,7 +1571,7 @@
 //     icon: Info,
 //     path: "/about-us",
 //   },
-  
+
 // ];
 
 // const iconVariants = {
@@ -3070,14 +3070,9 @@ import "./Header.css";
 const categories = ["All Categories", "Laptops", "Accessories", "Services"];
 
 const navigationItems = [
+
   {
-    label: "HOME",
-    subtitle: "Back to Homepage",
-    icon: Home,
-    path: "/",
-  },
-  {
-    label: "BUY",
+    label: "SHOP",
     subtitle: "Laptops & Accessories",
     icon: Laptop,
     path: "/shop",
@@ -3241,9 +3236,9 @@ export default function Header() {
 
       const role = String(
         user?.role ||
-          user?.userRole ||
-          user?.type ||
-          ""
+        user?.userRole ||
+        user?.type ||
+        ""
       ).toUpperCase();
 
       switch (role) {
@@ -3291,9 +3286,9 @@ export default function Header() {
 
       const role = String(
         user?.role ||
-          user?.userRole ||
-          user?.type ||
-          ""
+        user?.userRole ||
+        user?.type ||
+        ""
       ).toUpperCase();
 
       return (
@@ -3389,12 +3384,12 @@ export default function Header() {
         )
           ? wishlistData.wishlist.products
           : Array.isArray(wishlistData?.products)
-          ? wishlistData.products
-          : Array.isArray(wishlistData?.items)
-          ? wishlistData.items
-          : Array.isArray(wishlistData)
-          ? wishlistData
-          : [];
+            ? wishlistData.products
+            : Array.isArray(wishlistData?.items)
+              ? wishlistData.items
+              : Array.isArray(wishlistData)
+                ? wishlistData
+                : [];
 
       setWishlistCount(wishlistItems.length);
 
@@ -3407,12 +3402,12 @@ export default function Header() {
         Array.isArray(cartData?.data?.items)
           ? cartData.data.items
           : Array.isArray(cartData?.items)
-          ? cartData.items
-          : Array.isArray(cartData?.cartItems)
-          ? cartData.cartItems
-          : Array.isArray(cartData)
-          ? cartData
-          : [];
+            ? cartData.items
+            : Array.isArray(cartData?.cartItems)
+              ? cartData.cartItems
+              : Array.isArray(cartData)
+                ? cartData
+                : [];
 
       setCartCount(cartItems.length);
     } catch (error) {
@@ -3490,9 +3485,9 @@ export default function Header() {
           prev.map((item) =>
             item._id === notification._id
               ? {
-                  ...item,
-                  isRead: true,
-                }
+                ...item,
+                isRead: true,
+              }
               : item
           )
         );
@@ -3958,11 +3953,10 @@ export default function Header() {
                                   notification
                                 )
                               }
-                              className={`notification-item${
-                                !notification.isRead
+                              className={`notification-item${!notification.isRead
                                   ? " notification-item-unread"
                                   : ""
-                              }`}
+                                }`}
                             >
                               <div className="notification-item-row">
 
@@ -4211,10 +4205,9 @@ export default function Header() {
           }) => (
             <NavLink
               className={() =>
-                `nav-item${
-                  isNavItemActive(path)
-                    ? " nav-item-active"
-                    : ""
+                `nav-item${isNavItemActive(path)
+                  ? " nav-item-active"
+                  : ""
                 }`
               }
               to={getNavTarget({ path, corporate })}
@@ -4270,10 +4263,9 @@ export default function Header() {
                 }) => (
                   <NavLink
                     className={() =>
-                      `mobile-nav-item${
-                        isNavItemActive(path)
-                          ? " mobile-nav-item-active"
-                          : ""
+                      `mobile-nav-item${isNavItemActive(path)
+                        ? " mobile-nav-item-active"
+                        : ""
                       }`
                     }
                     to={getNavTarget({ path, corporate })}
@@ -4481,7 +4473,7 @@ export default function Header() {
             >
               <p>
                 {comparePopup ===
-                "empty"
+                  "empty"
                   ? "No products added to compare yet."
                   : "Add at least one more product to compare."}
               </p>
@@ -4490,22 +4482,22 @@ export default function Header() {
 
                 {comparePopup ===
                   "empty" && (
-                  <button
-                    type="button"
-                    className="compare-popup-primary-btn"
-                    onClick={() => {
-                      setComparePopup(
-                        null
-                      );
+                    <button
+                      type="button"
+                      className="compare-popup-primary-btn"
+                      onClick={() => {
+                        setComparePopup(
+                          null
+                        );
 
-                      navigate(
-                        "/shop"
-                      );
-                    }}
-                  >
-                    Browse Laptops
-                  </button>
-                )}
+                        navigate(
+                          "/shop"
+                        );
+                      }}
+                    >
+                      Browse Laptops
+                    </button>
+                  )}
 
                 <button
                   type="button"
