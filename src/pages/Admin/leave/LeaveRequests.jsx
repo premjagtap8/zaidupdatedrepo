@@ -914,7 +914,7 @@
 
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { getAllLeaves } from "../../../services/leaveService";
+import { getAllLeaves, approveLeave, rejectLeave } from "../../../services/leaveService";
 import "./LeaveRequests.css";
 
 const LeaveRequests = () => {
@@ -993,8 +993,8 @@ const LeaveRequests = () => {
 
       toast.error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Failed to load leave requests."
+        error?.message ||
+        "Failed to load leave requests."
       );
 
       setLeaves([]);
@@ -1043,9 +1043,8 @@ const LeaveRequests = () => {
     }
 
     if (leave?.user?.firstName || leave?.user?.lastName) {
-      return `${leave?.user?.firstName || ""} ${
-        leave?.user?.lastName || ""
-      }`.trim();
+      return `${leave?.user?.firstName || ""} ${leave?.user?.lastName || ""
+        }`.trim();
     }
 
     if (leave?.employeeName) {
@@ -1134,8 +1133,8 @@ const LeaveRequests = () => {
 
     setRemark(
       leave?.adminRemark ||
-        leave?.remark ||
-        ""
+      leave?.remark ||
+      ""
     );
 
     setShowModal(true);
@@ -1201,11 +1200,11 @@ const LeaveRequests = () => {
        * this will work directly.
        */
 
-      const response = await updateLeaveStatus(
-        selectedLeave._id,
-        normalizedStatus,
-        remark.trim()
-      );
+      // ADD this
+      const response =
+        normalizedStatus === "APPROVED"
+          ? await approveLeave(selectedLeave._id, remark.trim())
+          : await rejectLeave(selectedLeave._id, remark.trim());
 
       console.log(
         "LEAVE ACTION RESPONSE:",
@@ -1214,11 +1213,10 @@ const LeaveRequests = () => {
 
       toast.success(
         response?.message ||
-          `Leave request ${
-            normalizedStatus === "APPROVED"
-              ? "approved"
-              : "rejected"
-          } successfully.`
+        `Leave request ${normalizedStatus === "APPROVED"
+          ? "approved"
+          : "rejected"
+        } successfully.`
       );
 
       // --------------------------------------------------
@@ -1244,8 +1242,8 @@ const LeaveRequests = () => {
 
       toast.error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Failed to update leave request."
+        error?.message ||
+        "Failed to update leave request."
       );
     } finally {
       setActionLoading(false);
@@ -1567,7 +1565,7 @@ const LeaveRequests = () => {
 
                       {formatLeaveType(
                         leave.status ||
-                          "PENDING"
+                        "PENDING"
                       )}
 
                     </span>
@@ -1786,7 +1784,7 @@ const LeaveRequests = () => {
 
                         {Number(
                           selectedLeave.totalDays ||
-                            0
+                          0
                         ) === 1
                           ? "Day"
                           : "Days"}
@@ -1810,7 +1808,7 @@ const LeaveRequests = () => {
                       >
                         {formatLeaveType(
                           selectedLeave.status ||
-                            "PENDING"
+                          "PENDING"
                         )}
                       </strong>
 
@@ -1866,34 +1864,34 @@ const LeaveRequests = () => {
 
                 {String(
                   selectedLeave.status ||
-                    "PENDING"
+                  "PENDING"
                 ).toUpperCase() ===
                   "PENDING" && (
 
-                  <div className="detail-section">
+                    <div className="detail-section">
 
-                    <h4>
-                      Admin Remark
-                    </h4>
+                      <h4>
+                        Admin Remark
+                      </h4>
 
-                    <textarea
-                      value={remark}
-                      onChange={(event) =>
-                        setRemark(
-                          event.target.value
-                        )
-                      }
-                      placeholder="Enter remark for employee..."
-                      rows={4}
-                      disabled={
-                        actionLoading
-                      }
-                      className="leave-remark-input"
-                    />
+                      <textarea
+                        value={remark}
+                        onChange={(event) =>
+                          setRemark(
+                            event.target.value
+                          )
+                        }
+                        placeholder="Enter remark for employee..."
+                        rows={4}
+                        disabled={
+                          actionLoading
+                        }
+                        className="leave-remark-input"
+                      />
 
-                  </div>
+                    </div>
 
-                )}
+                  )}
 
               </div>
 
@@ -1920,54 +1918,54 @@ const LeaveRequests = () => {
 
                 {String(
                   selectedLeave.status ||
-                    "PENDING"
+                  "PENDING"
                 ).toUpperCase() ===
                   "PENDING" && (
 
-                  <div className="modal-action-buttons">
+                    <div className="modal-action-buttons">
 
-                    <button
-                      type="button"
-                      className="reject-btn"
-                      onClick={() =>
-                        handleLeaveAction(
-                          "REJECTED"
-                        )
-                      }
-                      disabled={
-                        actionLoading
-                      }
-                    >
+                      <button
+                        type="button"
+                        className="reject-btn"
+                        onClick={() =>
+                          handleLeaveAction(
+                            "REJECTED"
+                          )
+                        }
+                        disabled={
+                          actionLoading
+                        }
+                      >
 
-                      {actionLoading
-                        ? "Processing..."
-                        : "✕ Reject"}
+                        {actionLoading
+                          ? "Processing..."
+                          : "✕ Reject"}
 
-                    </button>
+                      </button>
 
 
-                    <button
-                      type="button"
-                      className="approve-btn"
-                      onClick={() =>
-                        handleLeaveAction(
-                          "APPROVED"
-                        )
-                      }
-                      disabled={
-                        actionLoading
-                      }
-                    >
+                      <button
+                        type="button"
+                        className="approve-btn"
+                        onClick={() =>
+                          handleLeaveAction(
+                            "APPROVED"
+                          )
+                        }
+                        disabled={
+                          actionLoading
+                        }
+                      >
 
-                      {actionLoading
-                        ? "Processing..."
-                        : "✓ Approve"}
+                        {actionLoading
+                          ? "Processing..."
+                          : "✓ Approve"}
 
-                    </button>
+                      </button>
 
-                  </div>
+                    </div>
 
-                )}
+                  )}
 
               </div>
 

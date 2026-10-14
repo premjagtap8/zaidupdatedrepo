@@ -3245,6 +3245,11 @@ export default function Header() {
         case "ADMIN":
           return "/admin-dashboard";
 
+        case "HR":
+        case "HR_EXECUTIVE":
+        case "HR_MANAGER":
+          return "/hr-dashboard";
+
         case "INVENTORY":
         case "INVENTORY_MANAGER":
           return "/inventory-dashboard";
@@ -3954,8 +3959,8 @@ export default function Header() {
                                 )
                               }
                               className={`notification-item${!notification.isRead
-                                  ? " notification-item-unread"
-                                  : ""
+                                ? " notification-item-unread"
+                                : ""
                                 }`}
                             >
                               <div className="notification-item-row">
