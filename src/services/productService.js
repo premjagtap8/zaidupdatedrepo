@@ -244,6 +244,35 @@ export const getProduct = async (id) => {
 };
 
 
+
+// =====================================================
+// GET SINGLE PRODUCT BY SLUG (NEW)
+// =====================================================
+//
+// Calls: GET /products/slug/:slug
+//
+// Used by the product details page, because the URL
+// now contains the slug (asus-expertbook-0808)
+// instead of the Mongo _id.
+//
+// encodeURIComponent keeps the URL safe if a slug
+// ever contains unusual characters.
+//
+// =====================================================
+
+export const getProductBySlug = async (slug) => {
+
+    return await axios.get(
+
+        `${API}/slug/${encodeURIComponent(slug)}`,
+
+        getConfig()
+
+    );
+
+};
+
+
 // =====================================================
 // UPDATE PRODUCT
 // =====================================================

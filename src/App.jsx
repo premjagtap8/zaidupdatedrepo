@@ -5353,7 +5353,11 @@ function App() {
 
           <Route path="/products" element={<Products />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/shop/product/:id" element={<ProductDetails />} />
+          {/*
+  The last part of the URL is now the product slug,
+  e.g. /shop/product/asus-expertbook-0808
+*/}
+          <Route path="/shop/product/:slug" element={<ProductDetails />} />
 
           {/* =================================================
               EMPLOYEE LEAVE DETAILS
